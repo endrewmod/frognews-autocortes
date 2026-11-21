@@ -1,0 +1,16 @@
+.env
+jobs/
+jobs/.token
+local_config.json
+cortes/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.mp4
+*.wav
+*.ass
+!**/README.md
+.DS_Store

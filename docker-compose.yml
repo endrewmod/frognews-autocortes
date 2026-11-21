@@ -1,0 +1,28 @@
+services:
+  autocortes:
+    build: .
+    container_name: frognews-autocortes
+    env_file:
+      - .env
+    environment:
+      JOBS_DIR: /app/jobs
+      OUTPUT_DIR: /app/cortes
+      WHISPER_MODEL: ${WHISPER_MODEL:-small}
+      MAX_VIDEO_MINUTES: ${MAX_VIDEO_MINUTES:-240}
+      CORS_ORIGINS: ${CORS_ORIGINS:-*}
+    ports:
+      - "${PORT:-8000}:8000"
+    volumes:
+      - ./jobs:/app/jobs
+      - ./cortes:/app/cortes
+      - whisper-cache:/root/.cache/huggingface
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+volumes:
+  whisper-cache:

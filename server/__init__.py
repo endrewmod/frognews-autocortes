@@ -1,0 +1,1 @@
+"""FrogNews AutoCortes render server."""
