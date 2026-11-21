@@ -95,15 +95,16 @@ def set_output_dir(path_str: str) -> Path:
 
 
 def get_lan_ip() -> str:
-    """LAN IP (e.g. 192.168.0.10) — the address other devices on the
-    same Wi-Fi use to reach this machine. Uses a UDP connect, which
-    opens no connection and sends no data."""
+    """LAN IP (ex.: o IP da sua rede local) — the address other devices on the
+    same Wi-Fi use to reach this machine. Resolved locally from this
+    machine's own hostname; sends nothing anywhere."""
     try:
-        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
-            sock.connect(("8.8.8.8", 80))
-            return sock.getsockname()[0]
+        ip = socket.gethostbyname(socket.gethostname())
+        if ip and not ip.startswith("127."):
+            return ip
     except OSError:
-        return "127.0.0.1"
+        pass
+    return "localhost"
 
 
 def get_or_create_token() -> str:
@@ -142,7 +143,7 @@ def check_token(provided: str | None) -> bool:
 def server_urls(port: int = 8000) -> dict[str, str]:
     lan_ip = get_lan_ip()
     return {
-        "localhost_url": f"http://127.0.0.1:{port}",
+        "localhost_url": f"http://localhost:{port}",
         "lan_ip": lan_ip,
         "lan_url": f"http://{lan_ip}:{port}",
     }

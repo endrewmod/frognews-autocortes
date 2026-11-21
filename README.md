@@ -141,11 +141,11 @@ O terminal mostra, por exemplo:
 
 ```
 🐸 FrogNews AutoCortes — servidor local rodando
-  Neste computador:  http://127.0.0.1:8000
-  Na mesma Wi-Fi:    http://192.168.0.10:8000
-  Página local:      http://127.0.0.1:8000/local
+  Neste computador:  http://localhost:8000
+  Na mesma Wi-Fi:    http://<IP-da-sua-rede>:8000
+  Página local:      http://localhost:8000/local
   Pasta dos cortes:  /home/voce/Videos/FrogNews-Cortes
-  Token de conexão:  AbCdEfGh1234...
+  Token de conexão:  <seu-token>
 ```
 
 **Deixe essa janela aberta enquanto usa o site.** Fechou, o
@@ -156,9 +156,9 @@ nome `frognews-<id>.mp4` — e uma cópia fica em `jobs/<id>/`.
 
 No site, no campo de conexão, cole:
 
-1. **Endereço:** `http://127.0.0.1:8000` se o site está aberto no
+1. **Endereço:** `http://localhost:8000` se o site está aberto no
    mesmo computador; ou o endereço da Wi-Fi
-   (`http://192.168.0.10:8000`) se está no celular.
+   (`http://<IP-da-sua-rede>:8000`) se está no celular.
 2. **Token:** o token que apareceu no terminal (ou em
    `http://localhost:8000/local`).
 3. Clique em **Conectar**. O site chama `GET /connect` e mostra
@@ -177,7 +177,7 @@ cp .env.example .env
 pip install -r requirements.txt
 python3 run_local.py --output-dir ~/Videos/FrogNews-Cortes
 # ou: uvicorn server.main:app --port 8000   (sem pasta/token automáticos)
-# abra http://127.0.0.1:8000/local
+# abra http://localhost:8000/local
 ```
 
 Smoke test (ffmpeg, yt-dlp, deps, compile, `/health` + `/server-info`):
@@ -207,14 +207,14 @@ curl -O "localhost:8000/jobs/abc123/download?token=$TOKEN"
 HTTPS (cadeado). O navegador não deixa uma página HTTPS falar
 com um endereço `http://` comum — isso se chama *conteúdo
 misto* e o navegador bloqueia sem perguntar. Então o site do
-GitHub **não consegue** falar direto com `http://127.0.0.1:8000`
-ou `http://192.168.0.10:8000` do seu computador.
+GitHub **não consegue** falar direto com `http://localhost:8000`
+ou `http://<IP-da-sua-rede>:8000` do seu computador.
 
 **Os caminhos confiáveis são:**
 
 **(a) Usar o app servido pelo próprio servidor local (recomendado).**
 Abra `http://localhost:8000/local` no computador (ou
-`http://192.168.0.10:8000/local` no celular, mesmo Wi-Fi). Essa
+`http://<IP-da-sua-rede>:8000/local` no celular, mesmo Wi-Fi). Essa
 página é `http://` falando com `http://` — sem bloqueio — e
 mostra status, IP, pasta e token. O site completo do GitHub
 continua existindo para baixar o servidor; o uso do dia a dia
@@ -241,14 +241,14 @@ ninguém usa o seu servidor mesmo com o endereço público.
 
 | Endereço | O que é | Quando usar |
 |---|---|---|
-| `127.0.0.1` / `localhost` | “este computador” — só funciona na própria máquina | Site aberto no mesmo PC do servidor |
-| `192.168.x.x` (IP da rede local) | Endereço do computador dentro da sua Wi-Fi/casa | Celular ou outro PC na mesma Wi-Fi |
+| `localhost` | “este computador” — só funciona na própria máquina | Site aberto no mesmo PC do servidor |
+| `<IP-da-sua-rede>` (IP da rede local) | Endereço do computador dentro da sua Wi-Fi/casa | Celular ou outro PC na mesma Wi-Fi |
 | IP público | Endereço da sua internet visto de fora | Não use sem túnel + token — expor a porta 8000 direto na internet deixa qualquer um tentar usar o seu servidor |
 
 **Firewall:** na primeira vez o Windows/macOS pode perguntar se
 permite o Python na rede — clique em permitir **apenas em rede
 privada** (casa/trabalho). Se o celular não conectar no IP
-`192.168.x.x`, verifique: mesmo Wi-Fi, servidor rodando, e a
+`<IP-da-sua-rede>`, verifique: mesmo Wi-Fi, servidor rodando, e a
 porta 8000 liberada no firewall da rede privada. **Não libere a
 porta no roteador e não exponha o servidor à internet sem o
 token** — o token é a única proteção dos endpoints de job.

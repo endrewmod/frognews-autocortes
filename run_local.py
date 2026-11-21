@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Local launcher for FrogNews AutoCortes — one command, no cloud.
 
-Starts the render server on this machine (0.0.0.0:8000) so the web
+Starts the render server on this machine (porta 8000) so the web
 app — on GitHub Pages or served from this server at /local — can
 connect to it while it is running.
 
@@ -56,7 +56,7 @@ def _ask_output_dir(cli_value: str | None) -> Path:
 def main() -> int:
     parser = argparse.ArgumentParser(description="FrogNews AutoCortes — servidor local")
     parser.add_argument("--host", default="0.0.0.0",
-                        help="bind address (default 0.0.0.0 = this machine + LAN)")
+                        help="endereco de escuta (padrao: esta maquina + rede local)")
     parser.add_argument("--port", type=int, default=int(os.environ.get("PORT", "8000")))
     parser.add_argument("--output-dir", default=None,
                         help="folder where finished cuts are saved")

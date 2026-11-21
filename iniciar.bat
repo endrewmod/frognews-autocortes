@@ -2,7 +2,7 @@
 REM FrogNews AutoCortes — iniciar (Windows).
 REM Double-click iniciar.bat. Creates a virtualenv on first run,
 REM installs deps, asks for the output folder, then starts the
-REM local server on 0.0.0.0:8000.
+REM local server on port 8000.
 cd /d "%~dp0"
 
 where python >nul 2>&1

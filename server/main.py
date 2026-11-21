@@ -11,7 +11,7 @@ Flow (matches the web-app steps, process by process):
 
 Run locally:  python3 run_local.py   (or double-click iniciar.bat / bash iniciar.sh)
   — asks for the output folder, prints localhost + LAN URLs and the
-  connection token, serves the app at http://127.0.0.1:8000/local.
+  connection token, serves the app at http://localhost:8000/local.
 Jobs live under $JOBS_DIR (default ./jobs), one folder per job, with
 job.json persisted so a restart does not lose job state. Finished
 MP4s are also copied to the user-chosen output folder
@@ -79,10 +79,10 @@ else:
         if o.strip()
     ] + [
         "http://localhost:8000",
-        "http://127.0.0.1:8000",
+        "http://localhost:8000",
         f"http://{_LAN_IP}:8000",
         f"http://localhost:{_PORT}",
-        f"http://127.0.0.1:{_PORT}",
+        f"http://localhost:{_PORT}",
         f"http://{_LAN_IP}:{_PORT}",
     ]
     _cors_regex = r"https://[a-zA-Z0-9-]+\.github\.io"

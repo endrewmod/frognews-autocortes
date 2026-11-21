@@ -2,7 +2,7 @@
 # FrogNews AutoCortes — iniciar (Linux / Mac).
 # Double-click / run:  bash iniciar.sh
 # Creates a virtualenv on first run, installs deps, asks for the
-# output folder, then starts the local server on 0.0.0.0:8000.
+# output folder, then starts the local server on port 8000.
 set -e
 cd "$(dirname "$0")"
 

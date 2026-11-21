@@ -27,9 +27,9 @@ check python3 -c "from server.main import app; print('app imports ok')"
 if command -v curl >/dev/null 2>&1; then
   (python3 -m uvicorn server.main:app --port 8123 >/tmp/autocortes-smoke.log 2>&1 & echo $! > /tmp/autocortes-smoke.pid)
   sleep 4
-  check curl -fsS http://127.0.0.1:8123/health
-  check curl -fsS http://127.0.0.1:8123/server-info
-  check curl -fsS "http://127.0.0.1:8123/connect"
+  check curl -fsS http://localhost:8123/health
+  check curl -fsS http://localhost:8123/server-info
+  check curl -fsS "http://localhost:8123/connect"
   kill "$(cat /tmp/autocortes-smoke.pid)" 2>/dev/null || true
 else
   echo "  SKIP  curl not installed — start the server manually to check /health"
