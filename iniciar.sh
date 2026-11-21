@@ -1,8 +1,29 @@
 #!/usr/bin/env bash
 # FrogNews AutoCortes — iniciar (Linux / Mac).
 # Double-click / run:  bash iniciar.sh
-# Creates a virtualenv on first run, installs deps, asks for the
-# output folder, then starts the local server on port 8000.
+# Cria um terminal para mostrar o endereço, o IP da rede e o token,
+# cria um virtualenv na primeira vez, instala as dependências, pergunta
+# a pasta dos cortes e inicia o servidor local na porta 8000.
+#
+# IMPORTANTE: o servidor precisa rodar dentro de um terminal aberto,
+# senão a pessoa não vê o endereço nem o token para colar no site.
+# Se este script for aberto pelo gerenciador de arquivos (sem terminal),
+# ele se reabre sozinho dentro do Konsole (KDE) ou de outro terminal.
+if [ -z "$FROGNEWS_IN_TERMINAL" ] && [ ! -t 1 ]; then
+  export FROGNEWS_IN_TERMINAL=1
+  SCRIPT="$(cd "$(dirname "$0")" && pwd)/$(basename "$0")"
+  if command -v konsole >/dev/null 2>&1; then
+    exec konsole --hold -e bash "$SCRIPT" "$@"
+  elif command -v gnome-terminal >/dev/null 2>&1; then
+    exec gnome-terminal -- bash -c "bash \"$SCRIPT\" \"\$@\"; echo; read -p 'Pressione Enter para fechar... '" _ "$@"
+  elif command -v xfce4-terminal >/dev/null 2>&1; then
+    exec xfce4-terminal --hold -e bash "$SCRIPT" "$@"
+  elif command -v xterm >/dev/null 2>&1; then
+    exec xterm -hold -e bash "$SCRIPT" "$@"
+  fi
+  # Nenhum terminal encontrado: segue sem terminal. O servidor sobe
+  # mesmo assim, e o endereço aparece na página local do servidor.
+fi
 set -e
 cd "$(dirname "$0")"
 

@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Iniciar FrogNews AutoCortes
+Comment=Abre o terminal (Konsole) e inicia o servidor local do AutoCortes, mostrando o endereço e o token para colar no site.
+Exec=bash -c 'cd "$(dirname "%k")" && exec ./iniciar.sh'
+Terminal=true
+Categories=Utility;

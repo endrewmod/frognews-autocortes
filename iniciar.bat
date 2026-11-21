@@ -1,8 +1,11 @@
 @echo off
+title FrogNews AutoCortes - servidor local
 REM FrogNews AutoCortes — iniciar (Windows).
-REM Double-click iniciar.bat. Creates a virtualenv on first run,
-REM installs deps, asks for the output folder, then starts the
-REM local server on port 8000.
+REM Double-click iniciar.bat. Abre esta janela do terminal e a mantem
+REM aberta mostrando o endereco, o IP da rede e o token para colar no
+REM site. Creates a virtualenv on first run, installs deps, asks for
+REM the output folder, then starts the local server on port 8000.
+REM Nao feche esta janela enquanto usa o site: fechou, o servidor para.
 cd /d "%~dp0"
 
 where python >nul 2>&1
