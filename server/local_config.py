@@ -94,16 +94,103 @@ def set_output_dir(path_str: str) -> Path:
     return path
 
 
-def get_lan_ip() -> str:
-    """LAN IP (ex.: o IP da sua rede local) — the address other devices on the
-    same Wi-Fi use to reach this machine. Resolved locally from this
-    machine's own hostname; sends nothing anywhere."""
-    try:
-        ip = socket.gethostbyname(socket.gethostname())
-        if ip and not ip.startswith("127."):
+def _is_usable_ipv4(ip: str) -> bool:
+    """A real address another device on the Wi-Fi can reach: IPv4,
+    not loopback, not link-local (169.254.x.x)."""
+    parts = ip.split(".")
+    if len(parts) != 4 or not all(p.isdigit() for p in parts):
+        return False
+    if ip.startswith("127.") or ip.startswith("169.254."):
+        return False
+    return True
+
+
+def _is_private_ipv4(ip: str) -> bool:
+    """Home/office ranges first: 192.168.x, 10.x, 172.16-31.x."""
+    if ip.startswith("192.168.") or ip.startswith("10."):
+        return True
+    if ip.startswith("172."):
+        try:
+            second = int(ip.split(".")[1])
+            return 16 <= second <= 31
+        except ValueError:
+            return False
+    return False
+
+
+def _pick_best(candidates: list[str]) -> str | None:
+    """Prefer a private-range address, then any usable IPv4."""
+    usable = [ip for ip in candidates if _is_usable_ipv4(ip)]
+    for ip in usable:
+        if _is_private_ipv4(ip):
             return ip
+    return usable[0] if usable else None
+
+
+def _lan_ip_from_hostname_cmd() -> str | None:
+    """`hostname -I` (Linux): all addresses of this machine, no
+    network traffic at all. This is the one that works when the
+    hostname itself resolves to 127.0.0.1 in /etc/hosts."""
+    import shutil
+    import subprocess
+
+    if shutil.which("hostname") is None:
+        return None
+    try:
+        out = subprocess.run(
+            ["hostname", "-I"], capture_output=True, text=True, timeout=5
+        ).stdout.split()
+        return _pick_best([ip for ip in out if ":" not in ip])
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+
+def _lan_ip_from_gateway() -> str | None:
+    """Connect a UDP socket to the default gateway (read from
+    /proc/net/route, a local address) and ask which local interface
+    the OS would use. Connect on UDP sends nothing anywhere."""
+    try:
+        gateway = None
+        with open("/proc/net/route", encoding="utf-8") as fh:
+            next(fh)  # header
+            for line in fh:
+                fields = line.split()
+                if len(fields) >= 3 and fields[1] == "00000000":
+                    gw_hex = fields[2]
+                    gateway = ".".join(
+                        str(int(gw_hex[i : i + 2], 16))
+                        for i in (6, 4, 2, 0)
+                    )
+                    break
+        if not gateway:
+            return None
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+            sock.connect((gateway, 80))
+            ip = sock.getsockname()[0]
+        return ip if _is_usable_ipv4(ip) else None
     except OSError:
-        pass
+        return None
+
+
+def get_lan_ip() -> str:
+    """LAN IP (ex.: o IP da sua rede local) — the address other devices
+    on the same Wi-Fi use to reach this machine. Resolved locally from
+    this machine's own interfaces; sends nothing anywhere and never
+    leaves the machine. Returns "localhost" only when no LAN address
+    could be found at all."""
+    for method in (
+        _lan_ip_from_hostname_cmd,
+        _lan_ip_from_gateway,
+        lambda: _pick_best(
+            [info[4][0] for info in socket.getaddrinfo(socket.gethostname(), None)]
+        ),
+    ):
+        try:
+            ip = method()
+        except OSError:
+            ip = None
+        if ip:
+            return ip
     return "localhost"
 
 

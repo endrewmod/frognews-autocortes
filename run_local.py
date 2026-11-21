@@ -20,9 +20,12 @@ can start renders on your machine.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import shutil
+import socket
 import sys
+import urllib.request
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -53,6 +56,49 @@ def _ask_output_dir(cli_value: str | None) -> Path:
     return local_config.set_output_dir(str(default))
 
 
+def _port_is_free(port: int) -> bool:
+    """True when nothing is listening on this port yet."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        try:
+            sock.bind(("0.0.0.0", port))
+            return True
+        except OSError:
+            return False
+
+
+def _frognews_running(port: int) -> bool:
+    """True when a FrogNews server is already answering on this port
+    (its /health answers {"ok": true}). Any other program occupying
+    the port does not answer this."""
+    try:
+        with urllib.request.urlopen(
+            f"http://localhost:{port}/health", timeout=1.5
+        ) as resp:
+            return json.loads(resp.read()).get("ok") is True
+    except Exception:
+        return False
+
+
+def _pick_port(requested: int) -> tuple[int, str]:
+    """Port to start on. Returns (port, status):
+    - "free": the requested port is free.
+    - "already_running": a FrogNews server is already on this port —
+      start nothing, just show its address.
+    - "moved": the port was busy with something else, so the next
+      free port was chosen (and the banner says so)."""
+    if _port_is_free(requested):
+        return requested, "free"
+    if _frognews_running(requested):
+        return requested, "already_running"
+    for port in range(requested + 1, requested + 11):
+        if _port_is_free(port):
+            return port, "moved"
+    raise OSError(
+        f"portas {requested} a {requested + 10} ocupadas — "
+        "feche o outro programa e rode o iniciar de novo"
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="FrogNews AutoCortes — servidor local")
     parser.add_argument("--host", default="0.0.0.0",
@@ -69,12 +115,25 @@ def main() -> int:
         return 1
 
     token = local_config.get_or_create_token()
-    urls = local_config.server_urls(args.port)
+    try:
+        port, port_status = _pick_port(args.port)
+    except OSError as exc:
+        print(f"ERRO: {exc}", file=sys.stderr)
+        return 1
+    urls = local_config.server_urls(port)
 
     print()
     print("=" * 64)
-    print("  🐸 FrogNews AutoCortes — servidor local rodando")
-    print("=" * 64)
+    if port_status == "already_running":
+        print("  🐸 FrogNews AutoCortes — JÁ ESTÁ RODANDO")
+        print("=" * 64)
+        print("  Você já tem um servidor rodando — não precisa abrir outro.")
+        print("  Use o endereço e o token abaixo no site.")
+    else:
+        print("  🐸 FrogNews AutoCortes — servidor local rodando")
+        print("=" * 64)
+        if port_status == "moved":
+            print(f"  A porta {args.port} estava ocupada — usando a porta {port}.")
     print("  COPIE O ENDEREÇO E O TOKEN ABAIXO NO SITE E CLIQUE EM CONECTAR.")
     print()
     print(f"  Endereço neste PC:   {urls['localhost_url']}")
@@ -83,8 +142,14 @@ def main() -> int:
     print(f"  Pasta dos cortes:    {output_dir}")
     print(f"  Token de conexão:    {token}")
     print()
+    print("  No celular: abra o navegador e digite o endereço da Wi-Fi acima.")
     print("  Não compartilhe o token fora da sua rede.")
     print("  Não feche esta janela enquanto usa o site: fechou, o servidor para.")
+    if port_status == "already_running":
+        print("=" * 64)
+        print()
+        sys.stdout.flush()
+        return 0
     if shutil.which("ffmpeg") is None:
         print("  AVISO: ffmpeg não encontrado no PATH — o render vai falhar.")
         print("         Instale o ffmpeg e rode o iniciar de novo.")
@@ -93,14 +158,14 @@ def main() -> int:
     print()
     sys.stdout.flush()
     # So /server-info and /local report the same port we are about to bind.
-    os.environ["PORT"] = str(args.port)
+    os.environ["PORT"] = str(port)
 
     import uvicorn
 
     uvicorn.run(
         "server.main:app",
         host=args.host,
-        port=args.port,
+        port=port,
         log_level="info",
     )
     return 0
