@@ -14,3 +14,4 @@ venv/
 *.ass
 !**/README.md
 .DS_Store
+index.html.bak
