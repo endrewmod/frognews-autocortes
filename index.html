@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FrogNews AutoCortes — cole o link, escolha o take, baixe o Short</title>
+<meta name="description" content="FrogNews AutoCortes: automação de cortes para Shorts. O corte roda no seu PC, com o modelo v3 do FrogNews.">
+<style>
+  :root{
+    --bg:#0b0f0c; --card:#141a15; --card2:#1a211c; --line:#263026;
+    --text:#e8f0e9; --muted:#9db3a1; --green:#22c55e; --green2:#4ade80;
+    --yellow:#facc15; --red:#f87171; --orange:#fb923c;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;line-height:1.55}
+  a{color:var(--green2)}
+  .wrap{max-width:760px;margin:0 auto;padding:0 16px 64px}
+  header{padding:28px 0 8px;text-align:center}
+  header .frog{font-size:44px;line-height:1}
+  h1{margin:8px 0 4px;font-size:30px;line-height:1.2}
+  h1 span{color:var(--green2)}
+  .subtitle{color:var(--muted);margin:0 0 16px;font-size:16px}
+  section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-top:16px}
+  h2{margin:0 0 8px;font-size:19px}
+  h2 .n{display:inline-block;background:var(--green);color:#04120a;border-radius:50%;width:26px;height:26px;line-height:26px;text-align:center;font-size:15px;margin-right:6px}
+  p{margin:8px 0}
+  small,.hint{color:var(--muted);font-size:13px}
+  code{background:#0b0f0c;border:1px solid var(--line);padding:2px 6px;border-radius:6px;word-break:break-all;font-size:13px}
+  label{display:block;font-weight:600;margin:12px 0 4px;font-size:14px}
+  input,select{width:100%;padding:11px 12px;border-radius:9px;border:1px solid var(--line);background:#0b0f0c;color:var(--text);font-size:15px}
+  input:focus,select:focus{outline:2px solid var(--green);border-color:var(--green)}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .row>*{flex:1;min-width:140px}
+  button{cursor:pointer;border:0;border-radius:10px;padding:12px 18px;font-size:15px;font-weight:700;background:var(--green);color:#04120a;margin-top:12px}
+  button:hover{background:var(--green2)}
+  button:disabled{opacity:.45;cursor:not-allowed}
+  button.ghost{background:transparent;border:1px solid var(--green);color:var(--green2)}
+  .warn{background:#2a1f0a;border:1px solid #6b4d0d;border-radius:12px;padding:14px 16px;margin-top:16px;font-size:14px}
+  .warn b{color:var(--yellow)}
+  .status{margin-top:12px;padding:12px 14px;border-radius:10px;font-weight:600;display:none}
+  .status.ok{display:block;background:#0d2b16;border:1px solid #1f7a37;color:#86efac}
+  .status.bad{display:block;background:#2b1212;border:1px solid #7a1f1f;color:#fca5a5}
+  .status.info{display:block;background:#12203a;border:1px solid #274a7a;color:#93c5fd}
+  .kv{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin-top:10px;font-size:14px}
+  .kv dt{color:var(--muted)} .kv dd{margin:0;word-break:break-all}
+  .thumb{width:100%;max-width:320px;border-radius:10px;margin-top:10px;display:block}
+  .take{border:1px solid var(--line);background:var(--card2);border-radius:10px;padding:12px;margin-top:10px;cursor:pointer}
+  .take:hover{border-color:var(--green)}
+  .take.sel{border-color:var(--green);box-shadow:0 0 0 2px var(--green) inset}
+  .take .score{float:right;background:var(--green);color:#04120a;font-weight:800;border-radius:20px;padding:2px 10px;font-size:13px}
+  .take .hook{font-weight:700}
+  .bar{height:10px;background:#0b0f0c;border-radius:6px;overflow:hidden;margin-top:10px;border:1px solid var(--line)}
+  .bar>i{display:block;height:100%;background:var(--green);width:0%}
+  .steps{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .steps span{font-size:12px;padding:4px 9px;border-radius:20px;border:1px solid var(--line);color:var(--muted)}
+  .steps span.on{border-color:var(--green);color:var(--green2)}
+  .steps span.done{background:var(--green);color:#04120a;border-color:var(--green)}
+  ol{margin:8px 0;padding-left:22px}
+  ol li{margin:6px 0}
+  footer{margin-top:24px;color:var(--muted);font-size:13px;text-align:center}
+  .btn-big{display:block;text-align:center;text-decoration:none;background:var(--green);color:#04120a;font-weight:800;border-radius:10px;padding:14px 18px;margin-top:12px}
+  .btn-big:hover{background:var(--green2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="frog">🐸</div>
+  <h1>FrogNews <span>AutoCortes</span></h1>
+  <p class="subtitle">Cole o link, escolha o take, baixe o Short pronto — o corte roda no seu PC.</p>
+</header>
+
+<div class="warn">
+  <b>⚠️ Leia antes de conectar:</b> esta página é HTTPS e o navegador <b>bloqueia</b> conexão com endereço <code>http://</code> local (conteúdo misto).
+  <br>• Para conectar <b>desta página</b>, o servidor local precisa de um endereço HTTPS de túnel (Cloudflare Tunnel ou ngrok).
+  <br>• Sem túnel, use o app servido pelo próprio servidor: <a href="http://localhost:8000/local">http://localhost:8000/local</a> no mesmo PC, ou <code>http://&lt;IP da Wi-Fi&gt;:8000/local</code> no celular, na mesma Wi-Fi.
+</div>
+
+<section id="passo1">
+  <h2><span class="n">1</span>Baixar o servidor</h2>
+  <p>O servidor roda no <b>seu computador</b> — ele baixa o vídeo, transcreve, escolhe o take e renderiza o Short. Sem mensalidade.</p>
+  <a class="btn-big" href="https://github.com/endrewmod/frognews-autocortes/archive/refs/heads/main.zip">⬇ Baixar o servidor local (ZIP)</a>
+  <ol>
+    <li>Descompacte o ZIP em qualquer pasta do computador.</li>
+    <li>Dê dois cliques em <code>iniciar.bat</code> (Windows) ou rode <code>bash iniciar.sh</code> (Linux/Mac).</li>
+    <li>Escolha a pasta onde os cortes serão salvos e <b>deixe a janela aberta</b> enquanto usa o site.</li>
+  </ol>
+  <p class="hint">Na primeira vez é preciso ter Python 3.11+ e ffmpeg instalados. O terminal vai mostrar o endereço, o IP da Wi-Fi e o token de conexão.</p>
+</section>
+
+<section id="passo2">
+  <h2><span class="n">2</span>Conectar ao meu PC</h2>
+  <label for="addr">Endereço do servidor</label>
+  <input id="addr" type="text" value="http://127.0.0.1:8000" placeholder="http://127.0.0.1:8000 ou https://xxxx.trycloudflare.com">
+  <p class="hint">No mesmo PC: <code>http://127.0.0.1:8000</code>. No celular (mesma Wi-Fi): <code>http://192.168.x.x:8000</code>. Com túnel: cole o endereço <code>https://...</code> do túnel.</p>
+  <label for="token">Token de conexão</label>
+  <input id="token" type="text" placeholder="Token mostrado no terminal ou em http://localhost:8000/local" autocomplete="off">
+  <button id="btnConnect" type="button">Testar conexão</button>
+  <div id="connStatus" class="status"></div>
+  <dl class="kv" id="serverInfo" style="display:none">
+    <dt>ffmpeg</dt><dd id="siFfmpeg">—</dd>
+    <dt>yt-dlp</dt><dd id="siYt">—</dd>
+    <dt>Whisper</dt><dd id="siWhisper">—</dd>
+    <dt>Pasta dos cortes</dt><dd id="siOut">—</dd>
+  </dl>
+</section>
+
+<section id="passo3">
+  <h2><span class="n">3</span>Novo corte</h2>
+
+  <label for="url">Link do vídeo (YouTube ou Twitch)</label>
+  <input id="url" type="url" placeholder="https://www.youtube.com/watch?v=...">
+  <button id="btnFetch" type="button">Buscar vídeo</button>
+  <div id="videoStatus" class="status"></div>
+
+  <div id="videoBox" style="display:none">
+    <img id="thumb" class="thumb" alt="Miniatura do vídeo">
+    <dl class="kv">
+      <dt>Título</dt><dd id="vTitle">—</dd>
+      <dt>Canal</dt><dd id="vChannel">—</dd>
+      <dt>Duração</dt><dd id="vDur">—</dd>
+    </dl>
+    <div class="steps" id="jobSteps"></div>
+    <div class="bar"><i id="jobBar"></i></div>
+    <p class="hint" id="jobLine">Aguardando…</p>
+  </div>
+
+  <div class="row">
+    <button id="btnDownload" type="button" class="ghost" disabled>Baixar</button>
+    <button id="btnTranscribe" type="button" class="ghost" disabled>Transcrever</button>
+    <button id="btnSuggest" type="button" class="ghost" disabled>Sugerir melhor take</button>
+  </div>
+  <div id="suggestBox"></div>
+
+  <div class="row">
+    <div>
+      <label for="start">Início do corte</label>
+      <input id="start" type="text" placeholder="37:24 ou 2244">
+    </div>
+    <div>
+      <label for="end">Fim do corte</label>
+      <input id="end" type="text" placeholder="38:09 ou 2289">
+    </div>
+    <div>
+      <label for="streamer">Streamer (facecam)</label>
+      <select id="streamer">
+        <option value="davy" selected>Davy — facecam no canto superior direito</option>
+        <option value="alanzoka">Alanzoka — facecam à direita, meio/inferior</option>
+        <option value="default">Padrão</option>
+      </select>
+    </div>
+  </div>
+  <p class="hint">Aceita <code>mm:ss</code>, <code>hh:mm:ss</code> ou segundos. O ideal é um take de 15 a 30 segundos.</p>
+  <button id="btnRender" type="button" disabled>Renderizar no meu PC</button>
+  <div id="renderStatus" class="status"></div>
+  <div id="downloadBox" style="display:none;margin-top:12px">
+    <a id="dlLink" class="btn-big" href="#">⬇ Baixar o Short pronto (MP4)</a>
+    <p class="hint">O MP4 também já está na pasta de cortes escolhida, com o nome <code id="dlName">frognews-&lt;id&gt;.mp4</code>.</p>
+  </div>
+</section>
+
+<footer>
+  Modelo v3 — 1080×1920, rosto em cima, gameplay embaixo, legenda palavra por palavra, zoom só no impacto.<br>
+  Processe apenas vídeos que você tem direito de usar.
+</footer>
+
+</div>
+<script>
+(function(){
+  "use strict";
+  var $ = function(id){ return document.getElementById(id); };
+  var addrEl = $("addr"), tokenEl = $("token");
+  var jobId = null, pollTimer = null, selectedTake = null;
+
+  var STEPS = ["created","metadata","downloading","downloaded","transcribing","transcribed","scoring","scored","rendering","done"];
+  var STEP_LABEL = {created:"criado",metadata:"vídeo encontrado",downloading:"baixando",downloaded:"baixado",transcribing:"transcrevendo",transcribed:"transcrito",scoring:"avaliando takes",scored:"takes prontos",rendering:"renderizando",done:"pronto"};
+
+  // Restore saved connection
+  try {
+    var sa = localStorage.getItem("fa_address"), st = localStorage.getItem("fa_token");
+    if (sa) addrEl.value = sa;
+    if (st) tokenEl.value = st;
+  } catch(e){}
+
+  function base(){
+    return addrEl.value.trim().replace(/\/+$/,"");
+  }
+  function token(){ return tokenEl.value.trim(); }
+  function saveConn(){
+    try { localStorage.setItem("fa_address", base()); localStorage.setItem("fa_token", token()); } catch(e){}
+  }
+  function show(el, kind, msg){
+    el.className = "status " + kind;
+    el.textContent = msg;
+  }
+  function fmtDur(s){
+    s = Math.round(s || 0);
+    var h = Math.floor(s/3600), m = Math.floor(s%3600/60), sec = s%60;
+    var mm = (h? h+":" : "") + String(m).padStart(2,"0") + ":" + String(sec).padStart(2,"0");
+    return mm;
+  }
+  function parseTime(v){
+    v = (v||"").trim();
+    if (!v) return null;
+    if (/^\d+(\.\d+)?$/.test(v)) return parseFloat(v);
+    var p = v.split(":").map(Number);
+    if (p.some(isNaN)) return null;
+    var s = 0;
+    for (var i=0;i<p.length;i++) s = s*60 + p[i];
+    return s;
+  }
+  function fmtClock(s){
+    s = Math.round(s);
+    var h = Math.floor(s/3600), m = Math.floor(s%3600/60), sec = s%60;
+    return (h? h+":" : "") + String(m).padStart(2,"0") + ":" + String(sec).padStart(2,"0");
+  }
+  function explainFetchError(err){
+    var a = base();
+    if (location.protocol === "https:" && a.indexOf("http://") === 0) {
+      return "O navegador bloqueou a conexão (conteúdo misto): esta página é HTTPS e o endereço é http://. Use um túnel HTTPS (Cloudflare Tunnel/ngrok) ou abra http://localhost:8000/local no PC.";
+    }
+    if (err && err.name === "TypeError") {
+      return "Não consegui falar com o servidor. Confira se a janela do iniciar está aberta, se o endereço está certo e se está na mesma Wi-Fi (celular).";
+    }
+    return "Erro de conexão: " + (err && err.message ? err.message : err);
+  }
+  async function api(path, opts){
+    opts = opts || {};
+    opts.headers = opts.headers || {};
+    if (token()) opts.headers["X-Local-Token"] = token();
+    var res = await fetch(base() + path, opts);
+    var data = null;
+    try { data = await res.json(); } catch(e){}
+    if (!res.ok) {
+      var msg = (data && (data.detail || data.message)) ? (data.detail || data.message) : ("HTTP " + res.status);
+      var err = new Error(msg); err.status = res.status; throw err;
+    }
+    return data;
+  }
+  function renderSteps(step, progress){
+    var box = $("jobSteps");
+    box.innerHTML = "";
+    STEPS.forEach(function(s){
+      var sp = document.createElement("span");
+      sp.textContent = STEP_LABEL[s] || s;
+      var idx = STEPS.indexOf(s), cur = STEPS.indexOf(step);
+      if (idx < cur || step === "done") sp.className = "done";
+      else if (idx === cur) sp.className = "on";
+      box.appendChild(sp);
+    });
+    $("jobBar").style.width = (progress || 0) + "%";
+    $("jobLine").textContent = (STEP_LABEL[step] || step) + " — " + (progress || 0) + "%";
+  }
+  function stopPoll(){ if (pollTimer) { clearInterval(pollTimer); pollTimer = null; } }
+  function pollJob(until){
+    stopPoll();
+    pollTimer = setInterval(async function(){
+      if (!jobId) return;
+      try {
+        var j = await api("/jobs/" + jobId);
+        renderSteps(j.step, j.progress);
+        if (j.step === "done" || j.status === "done") {
+          stopPoll();
+          show($("renderStatus"), "ok", "✅ Short pronto! Baixe abaixo — ele também está na pasta de cortes.");
+          $("dlLink").href = base() + "/jobs/" + jobId + "/download?token=" + encodeURIComponent(token());
+          $("dlName").textContent = "frognews-" + jobId + ".mp4";
+          $("downloadBox").style.display = "block";
+          $("btnRender").disabled = false;
+        } else if (j.status === "error" || j.step === "error") {
+          stopPoll();
+          show($("renderStatus"), "bad", "❌ Erro no servidor: " + (j.error || "veja o terminal do servidor."));
+          $("btnRender").disabled = false;
+        }
+      } catch(e){
+        stopPoll();
+        show($("renderStatus"), "bad", "❌ " + explainFetchError(e));
+        $("btnRender").disabled = false;
+      }
+    }, 2000);
+  }
+
+  $("btnConnect").addEventListener("click", async function(){
+    var btn = $("btnConnect"); btn.disabled = true;
+    show($("connStatus"), "info", "Testando conexão…");
+    $("serverInfo").style.display = "none";
+    try {
+      if (!base()) throw new Error("Digite o endereço do servidor.");
+      var c = await api("/connect?token=" + encodeURIComponent(token()));
+      var info = await api("/server-info");
+      var h = await api("/health");
+      saveConn();
+      if (c.connected === false) {
+        show($("connStatus"), "bad", "❌ Token errado. Copie o token do terminal ou de http://localhost:8000/local e tente de novo.");
+      } else {
+        show($("connStatus"), "ok", "✅ Conectado ao seu PC! O servidor está rodando e pronto para cortar.");
+      }
+      $("serverInfo").style.display = "grid";
+      $("siFfmpeg").textContent = h.ffmpeg ? "sim ✅" : "não encontrado — instale o ffmpeg";
+      $("siYt").textContent = (h.yt_dlp || info.yt_dlp) ? "sim ✅" : "não encontrado";
+      $("siWhisper").textContent = (info.whisper_model || h.whisper_model || "—") + (h.llm_enabled ? " (IA ligada)" : "");
+      $("siOut").textContent = info.output_dir || "—";
+    } catch(e){
+      show($("connStatus"), "bad", "❌ Não conectado. " + explainFetchError(e));
+    } finally { btn.disabled = false; }
+  });
+
+  $("btnFetch").addEventListener("click", async function(){
+    var url = $("url").value.trim();
+    if (!url) { show($("videoStatus"), "bad", "Cole o link do vídeo primeiro."); return; }
+    var btn = $("btnFetch"); btn.disabled = true;
+    show($("videoStatus"), "info", "Buscando o vídeo…");
+    try {
+      var j = await api("/jobs", {method:"POST", headers:{"Content-Type":"application/json"}, body: JSON.stringify({url: url})});
+      jobId = j.id; selectedTake = null; stopPoll();
+      $("videoBox").style.display = "block";
+      $("thumb").src = j.thumbnail || "";
+      $("thumb").style.display = j.thumbnail ? "block" : "none";
+      $("vTitle").textContent = j.title || "—";
+      $("vChannel").textContent = j.channel || "—";
+      $("vDur").textContent = j.duration ? fmtDur(j.duration) + " (" + Math.round(j.duration) + "s)" : "—";
+      renderSteps(j.step, j.progress);
+      show($("videoStatus"), "ok", "✅ Vídeo encontrado. Agora clique em Baixar.");
+      $("btnDownload").disabled = false;
+      $("btnTranscribe").disabled = true;
+      $("btnSuggest").disabled = true;
+      $("btnRender").disabled = true;
+      $("suggestBox").innerHTML = "";
+      $("downloadBox").style.display = "none";
+    } catch(e){
+      if (e.status === 401) show($("videoStatus"), "bad", "❌ Token errado ou faltando. Conecte no Passo 2 primeiro.");
+      else show($("videoStatus"), "bad", "❌ " + explainFetchError(e) + " Detalhe: " + e.message);
+    } finally { btn.disabled = false; }
+  });
+
+  $("btnDownload").addEventListener("click", async function(){
+    if (!jobId) return;
+    var btn = $("btnDownload"); btn.disabled = true;
+    show($("videoStatus"), "info", "Baixando o vídeo no seu PC… isso pode demorar um pouco.");
+    try {
+      await api("/jobs/" + jobId + "/download", {method:"POST"});
+      show($("videoStatus"), "ok", "⬇ Download iniciado. Aguardando terminar…");
+      pollTimer = setInterval(async function(){
+        try {
+          var j = await api("/jobs/" + jobId);
+          renderSteps(j.step, j.progress);
+          if (j.step === "downloaded" || j.status === "downloaded") {
+            stopPoll();
+            show($("videoStatus"), "ok", "✅ Vídeo baixado. Agora clique em Transcrever.");
+            $("btnTranscribe").disabled = false;
+          } else if (j.status === "error") {
+            stopPoll();
+            show($("videoStatus"), "bad", "❌ Erro ao baixar: " + (j.error || "veja o terminal do servidor."));
+            btn.disabled = false;
+          }
+        } catch(e){ stopPoll(); show($("videoStatus"), "bad", "❌ " + explainFetchError(e)); btn.disabled = false; }
+      }, 2000);
+    } catch(e){
+      show($("videoStatus"), "bad", "❌ " + explainFetchError(e));
+      btn.disabled = false;
+    }
+  });
+
+  $("btnTranscribe").addEventListener("click", async function(){
+    if (!jobId) return;
+    var btn = $("btnTranscribe"); btn.disabled = true;
+    show($("videoStatus"), "info", "Transcrevendo o áudio palavra por palavra…");
+    try {
+      await api("/jobs/" + jobId + "/transcribe", {method:"POST"});
+      pollTimer = setInterval(async function(){
+        try {
+          var j = await api("/jobs/" + jobId);
+          renderSteps(j.step, j.progress);
+          if (j.step === "transcribed" || j.status === "transcribed") {
+            stopPoll();
+            show($("videoStatus"), "ok", "✅ Transcrição pronta. Agora clique em Sugerir melhor take.");
+            $("btnSuggest").disabled = false;
+          } else if (j.status === "error") {
+            stopPoll();
+            show($("videoStatus"), "bad", "❌ Erro ao transcrever: " + (j.error || "veja o terminal do servidor."));
+            btn.disabled = false;
+          }
+        } catch(e){ stopPoll(); show($("videoStatus"), "bad", "❌ " + explainFetchError(e)); btn.disabled = false; }
+      }, 2000);
+    } catch(e){
+      show($("videoStatus"), "bad", "❌ " + explainFetchError(e));
+      btn.disabled = false;
+    }
+  });
+
+  $("btnSuggest").addEventListener("click", async function(){
+    if (!jobId) return;
+    var btn = $("btnSuggest"); btn.disabled = true;
+    show($("videoStatus"), "info", "Analisando os melhores takes para viralizar…");
+    try {
+      var r = await api("/jobs/" + jobId + "/suggest", {method:"POST"});
+      var box = $("suggestBox"); box.innerHTML = "";
+      var list = r.suggestions || [];
+      if (!list.length) {
+        show($("videoStatus"), "bad", "Nenhum take sugerido. Escolha a minutagem manual abaixo.");
+      } else {
+        show($("videoStatus"), "ok", "✅ " + list.length + " takes sugeridos — clique em um para usar. Ou preencha a minutagem manual.");
+        list.forEach(function(s, i){
+          var d = document.createElement("div");
+          d.className = "take";
+          var reasons = (s.reason || []).join(" · ");
+          d.innerHTML = "<span class=\"score\">" + s.score + "/100</span>" +
+            "<div class=\"hook\">#" + (i+1) + " — " + fmtClock(s.start) + " → " + fmtClock(s.end) + "</div>" +
+            "<div>“" + escapeHtml(s.hook || "") + "”</div>" +
+            (reasons ? "<div><small>" + escapeHtml(reasons) + "</small></div>" : "") +
+            (s.transcript_excerpt ? "<div><small>“" + escapeHtml(s.transcript_excerpt) + "”</small></div>" : "");
+          d.addEventListener("click", function(){
+            document.querySelectorAll(".take").forEach(function(t){ t.classList.remove("sel"); });
+            d.classList.add("sel");
+            selectedTake = s;
+            $("start").value = fmtClock(s.start);
+            $("end").value = fmtClock(s.end);
+            $("btnRender").disabled = false;
+          });
+          box.appendChild(d);
+        });
+      }
+      $("btnRender").disabled = false;
+    } catch(e){
+      show($("videoStatus"), "bad", "❌ " + explainFetchError(e) + (e.status === 409 ? " (Transcreva primeiro.)" : ""));
+    } finally { btn.disabled = false; }
+  });
+
+  function escapeHtml(s){
+    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  ["start","end"].forEach(function(id){
+    $(id).addEventListener("input", function(){
+      var s = parseTime($("start").value), e = parseTime($("end").value);
+      $("btnRender").disabled = !(jobId && s !== null && e !== null && e > s);
+    });
+  });
+
+  $("btnRender").addEventListener("click", async function(){
+    if (!jobId) return;
+    var s = parseTime($("start").value), e = parseTime($("end").value);
+    if (s === null || e === null || e <= s) {
+      show($("renderStatus"), "bad", "Preencha início e fim válidos (ex.: 37:24 → 38:09).");
+      return;
+    }
+    var btn = $("btnRender"); btn.disabled = true;
+    $("downloadBox").style.display = "none";
+    show($("renderStatus"), "info", "✂️ Renderizando no seu PC no modelo v3… acompanhe o progresso acima.");
+    try {
+      await api("/jobs/" + jobId + "/render", {method:"POST", headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({start: s, end: e, streamer: $("streamer").value})});
+      pollJob();
+    } catch(e){
+      show($("renderStatus"), "bad", "❌ " + explainFetchError(e) + " Detalhe: " + e.message);
+      btn.disabled = false;
+    }
+  });
+})();
+</script>
+</body>
+</html>
